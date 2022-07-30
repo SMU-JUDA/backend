@@ -49,7 +49,7 @@ class PostDetailAPI(APIView):
         serializer = PostDetailSerializer(post)
         return Response(serializer.data)
 
-    @swagger_auto_schema(operation_description='글 수정', request_body=PostCreateUpdateParamsSerializer, responses={"200": PostUpdateSerializer}) 
+    @swagger_auto_schema(operation_description='글 수정', request_body=PostCreateUpdateParamsSerializer, responses={"200": PostCreateUpdateParamsSerializer}) 
     def put(self, request, pk, format=None):
         post = self.get_object(pk)
         serializer = PostCreateUpdateSerializer(post, data=request.data)
