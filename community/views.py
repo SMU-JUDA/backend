@@ -27,7 +27,7 @@ class PostListAPI(APIView):
         serializer = PostCreateUpdateSerializer(data=request.data)
         
         if serializer.is_valid():
-            serializer.save(writer_nickname=self.request.user.profile.nicknamce)
+            serializer.save(writer=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -49,7 +49,7 @@ class PostDetailAPI(APIView):
         serializer = PostDetailSerializer(post)
         return Response(serializer.data)
 
-    @swagger_auto_schema(operation_description='글 수정', request_body=PostCreateUpdateParamsSerializer, responses={"200": PostCreateUpdateParamsSerializer}) 
+    @swagger_auto_schema(operation_description='글 수정', request_body=PostCreateUpdateParamsSerializer, responses={"200": PostUpdateSerializer}) 
     def put(self, request, pk, format=None):
         post = self.get_object(pk)
         serializer = PostCreateUpdateSerializer(post, data=request.data)
