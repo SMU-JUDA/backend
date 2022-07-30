@@ -20,6 +20,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+from django.conf.urls.static import static
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -34,8 +36,9 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path(r'admin/', admin.site.urls),
-    path(r'api/', include(('api.urls', 'api'))), 
-]
+    path(r'', include(('api.urls', 'api'))), 
+    path(r'', include('community.urls', 'community')),
+]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += [
