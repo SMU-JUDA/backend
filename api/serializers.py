@@ -1,5 +1,6 @@
 import base64
 from dataclasses import field
+import email
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -25,6 +26,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
 class ReturnUserSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
+    nickname = serializers.CharField()
+    email = serializers.EmailField()
 
 class SuccesssUserSerializer(serializers.Serializer):
     user = ReturnUserSerializer()
