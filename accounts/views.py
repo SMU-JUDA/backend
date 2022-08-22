@@ -4,13 +4,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
+from django.contrib.auth import get_user_model
+
 from knox.models import AuthToken
 from accounts.models import Profile
-from accounts.serializers import CreateUserSerializer, SessionUserSerializer, SuccesssUserSerializer,SessionUserSerializer, LoginUserSerializer, UserUpdateSerializer
+from accounts.serializers import CreateUserSerializer, SessionUserSerializer, CreateUserSerializer,SessionUserSerializer, LoginUserSerializer, UserUpdateSerializer
 from drf_yasg.utils import swagger_auto_schema
 from accounts.api_params import register_params, login_params
 
 import re 
+
+user = get_user_model()
 
 def email_verification(email):
     p = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
@@ -19,7 +23,7 @@ def email_verification(email):
 class RegistrationAPI(generics.GenericAPIView):
     serializer_class = CreateUserSerializer
 
-    @swagger_auto_schema(operation_description='회원가입', request_body=register_params, responses={"200": SuccesssUserSerializer}) 
+    @swagger_auto_schema(operation_description='회원가입', request_body=register_params, responses={"200": CreateUserSerializer}) 
     def post(self, request, *args, **kwargs):
         if len(request.data["username"]) < 6:
             body = {"message": "아이디의 길이가 짧습니다. 6자리 이상의 아이디를 입력해주세요."}
@@ -40,7 +44,7 @@ class RegistrationAPI(generics.GenericAPIView):
 
         return Response(
             {
-                "user": SessionUserSerializer(
+                "user": CreateUserSerializer(
                     user, context=self.get_serializer_context()
                 ).data,
                 "token": AuthToken.objects.create(user)[1],
@@ -51,7 +55,7 @@ class RegistrationAPI(generics.GenericAPIView):
 class LoginAPI(generics.GenericAPIView):
     serializer_class = LoginUserSerializer
 
-    @swagger_auto_schema(operation_description='로그인', request_body=login_params, responses={"200": SuccesssUserSerializer})
+    @swagger_auto_schema(operation_description='로그인', request_body=login_params, responses={"200": SessionUserSerializer})
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -81,15 +85,15 @@ class ProfileUpdateAPI(APIView):
 
     def get_object(self, pk):
         try: 
-            return Profile.objects.get(user_pk=pk)
-        except Profile.DoesNotExist:
+            return user.objects.get(id=pk)
+        except user.DoesNotExist:
             raise Http404
 
     @swagger_auto_schema(operation_description='프로필 등록 및 수정', request_body= UserUpdateSerializer, responses={"200": UserUpdateSerializer}) 
     def put(self, request):
-        profile = self.get_object(self.request.user.id)
+        user = self.get_object(self.request.user.id)
         
-        serializer = UserUpdateSerializer(profile, data=request.data)
+        serializer = UserUpdateSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
