@@ -1,4 +1,3 @@
-import imp
 from django.http import Http404
 from rest_framework import generics, status, permissions
 from rest_framework.views import APIView
@@ -6,10 +5,10 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
 from knox.models import AuthToken
-from api.models import Profile
-from api.serializers import CreateUserSerializer, SessionUserSerializer, SuccesssUserSerializer,SessionUserSerializer, LoginUserSerializer, ProfileSerializer, ProfileSuccessSerializer, ProfileParamsSerializer
+from accounts.models import Profile
+from accounts.serializers import CreateUserSerializer, SessionUserSerializer, SuccesssUserSerializer,SessionUserSerializer, LoginUserSerializer, UserUpdateSerializer
 from drf_yasg.utils import swagger_auto_schema
-from api.api_params import register_params, login_params
+from accounts.api_params import register_params, login_params
 
 import re 
 
@@ -70,7 +69,7 @@ class UserSessionAPI(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SessionUserSerializer
  
-    @swagger_auto_schema(operation_description='유저 세션 확인', request_body=None, responses={"200": SuccesssUserSerializer})
+    @swagger_auto_schema(operation_description='유저 세션 확인', request_body=None, responses={"200": SessionUserSerializer})
     def get(self, request, format=None):
         user = self.request.user
         serializer = SessionUserSerializer(user)
@@ -78,7 +77,7 @@ class UserSessionAPI(generics.RetrieveAPIView):
 
 class ProfileUpdateAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = (MultiPartParser, ) 
+    parser_classes = (MultiPartParser, JSONParser, ) 
 
     def get_object(self, pk):
         try: 
@@ -86,11 +85,11 @@ class ProfileUpdateAPI(APIView):
         except Profile.DoesNotExist:
             raise Http404
 
-    @swagger_auto_schema(operation_description='프로필 등록 및 수정', request_body= ProfileSerializer, responses={"200": ProfileSuccessSerializer}) 
+    @swagger_auto_schema(operation_description='프로필 등록 및 수정', request_body= UserUpdateSerializer, responses={"200": UserUpdateSerializer}) 
     def put(self, request):
         profile = self.get_object(self.request.user.id)
         
-        serializer = ProfileSerializer(profile, data=request.data)
+        serializer = UserUpdateSerializer(profile, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

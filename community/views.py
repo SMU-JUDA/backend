@@ -14,7 +14,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 class PostListAPI(APIView):
     authentication_classes = [TokenAuthentication]
-    parser_classes = (MultiPartParser, ) 
+    parser_classes = (MultiPartParser, JSONParser, ) 
 
     @swagger_auto_schema(operation_description='글 목록', request_body=None, responses={"200": PostListSuccessSerializer(many=True)}) 
     def get(self, request, format=None):

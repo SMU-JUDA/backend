@@ -6,9 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
 from rest_framework import serializers
-from drf_extra_fields.fields import Base64ImageField
 
-from api.models import Profile
+from accounts.models import Profile
 
 # 회원가입
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -17,27 +16,39 @@ class CreateUserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "email", "password")
         extra_kwargs = {"password": {"write_only": True}}
 
+
     def create(self, validated_data):
         user = User.objects.create_user(
             validated_data["username"], validated_data["email"], validated_data["password"]
         )
         return user
 
+# swagger
 class ReturnUserSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
     nickname = serializers.CharField()
     email = serializers.EmailField()
 
+# swagger
 class SuccesssUserSerializer(serializers.Serializer):
     user = ReturnUserSerializer()
     token = serializers.CharField()
+    nickname = serializers.CharField()
+    email = serializers.EmailField()
+    
+class SessionProfileSerializer(serializers.ModelSerializer): 
+    class Meta: 
+        model = Profile 
+        fields = ("nickname",)
 
 # 접속 유지중인지 확인
 class SessionUserSerializer(serializers.ModelSerializer):
+    profile = SessionProfileSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ("id", "username", )
+        fields = ("id", "username", "email", "profile", )
 
 # 로그인
 class LoginUserSerializer(serializers.Serializer):
@@ -50,20 +61,22 @@ class LoginUserSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Unable to log in with provided credentials.")
 
+
 # 프로필 업데이트
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ("nickname", "image", )
+        fields = ("nickname",)
 
-class ProfileParamsSerializer(serializers.Serializer):
-    nickname = serializers.CharField()
-    image = serializers.ImageField()
+class UserUpdateSerializer(serializers.ModelSerializer):
+    profile = ProfileUpdateSerializer(read_only=True)
+    class Meta:
+        model = User
+        fields = ("email", "password", "profile", )
 
-class ProfileSuccessSerializer(serializers.Serializer):
-    nickname = serializers.CharField()
-    image = serializers.ImageField()
 
 class ProfileViewSerializer(serializers.Serializer):
     nickname = serializers.CharField()
-    image = serializers.ImageField()
+    # image = serializers.ImageField()
+    # password = serializers.CharField()
+    email = serializers.EmailField()

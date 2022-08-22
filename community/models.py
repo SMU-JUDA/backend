@@ -8,7 +8,7 @@ class Post(models.Model):
     # category = models.ForeignKey('Category', on_delete=models.SET_NULL, blank=True, null=True)
     # tags = models.ManyToManyField('Tag', blank=True)
     title = models.CharField('TITLE', max_length=50)
-    image = models.ImageField('IMAGE', upload_to='community/', blank=True, null=True)
+    # image = models.ImageField('IMAGE', upload_to='community/', blank=True, null=True)
     content = models.TextField('CONTENT')
     create_dt = models.DateTimeField('CREATE DT', auto_now_add=True)
     update_dt = models.DateTimeField('UPDATE DT', auto_now=True)
@@ -16,9 +16,9 @@ class Post(models.Model):
 
     writer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='community')
 
-@receiver(post_delete, sender=Post)
-def submission_delete(sender, instance, **kwargs):
-    instance.image.delete(False)
+# @receiver(post_delete, sender=Post)
+# def submission_delete(sender, instance, **kwargs):
+#     instance.image.delete(False)
 
 # class Category(models.Model):
 #     name = models.CharField(max_length=50, unique=True)

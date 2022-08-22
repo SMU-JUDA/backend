@@ -1,5 +1,5 @@
 from django.urls import include, path
-from api.views import ProfileUpdateAPI, RegistrationAPI, UserSessionAPI, LoginAPI
+from accounts.views import ProfileUpdateAPI, RegistrationAPI, UserSessionAPI, LoginAPI
 
 app_name = 'api'
 
