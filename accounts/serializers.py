@@ -9,11 +9,17 @@ from rest_framework import serializers
 
 from accounts.models import Profile
 
+class CreateUserProfileSerializer(serializers.ModelSerializer): 
+    class Meta: 
+        model = Profile 
+        fields = ("nickname",)
+
 # 회원가입
 class CreateUserSerializer(serializers.ModelSerializer):
+    profile = CreateUserProfileSerializer(read_only=True)
     class Meta:
         model = User
-        fields = ("id", "username", "email", "password")
+        fields = ("id", "username", "email", "password", "profile")
         extra_kwargs = {"password": {"write_only": True}}
 
 
@@ -21,21 +27,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             validated_data["username"], validated_data["email"], validated_data["password"]
         )
-        return user
-
-# swagger
-class ReturnUserSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    username = serializers.CharField()
-    nickname = serializers.CharField()
-    email = serializers.EmailField()
-
-# swagger
-class SuccesssUserSerializer(serializers.Serializer):
-    user = ReturnUserSerializer()
-    token = serializers.CharField()
-    nickname = serializers.CharField()
-    email = serializers.EmailField()
+        return user    
     
 class SessionProfileSerializer(serializers.ModelSerializer): 
     class Meta: 
@@ -61,7 +53,6 @@ class LoginUserSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Unable to log in with provided credentials.")
 
-
 # 프로필 업데이트
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,8 +66,3 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ("email", "password", "profile", )
 
 
-class ProfileViewSerializer(serializers.Serializer):
-    nickname = serializers.CharField()
-    # image = serializers.ImageField()
-    # password = serializers.CharField()
-    email = serializers.EmailField()
